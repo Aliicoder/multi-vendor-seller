@@ -1,6 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -8,151 +8,153 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { useEditProductMutation } from "@/store/apiSlices/productSlice"
-import useSetTimeout from "@/hooks/useSetTimeout"
-import useCategoriesPagination from "@/hooks/useCategoriesPagination"
-import { cn, errorToast, successToast } from "@/lib/utils"
-import formData from "@/lib/helpers/formData"
-import CustomButton from "@/components/buttons/CustomButton"
-import { useLocation, useNavigate } from "react-router-dom"
-import { VscEye } from "react-icons/vsc"
-import { VscEyeClosed } from "react-icons/vsc"
-import { LuArrowUpRight } from "react-icons/lu"
-import { ICategory, IProduct } from "@/types/types"
-import { MdDelete } from "react-icons/md"
-import { AiFillEdit } from "react-icons/ai"
-import { GrFormView } from "react-icons/gr"
-import Return from "@/components/returns/Return"
-import Loader from "@/components/Loaders/Loader"
-import productUpdateValidation from "@/validations/productUpdateValidation"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useEditProductMutation } from "@/store/apiSlices/productSlice";
+import useSetTimeout from "@/hooks/useSetTimeout";
+import useCategoriesPagination from "@/hooks/useCategoriesPagination";
+import { cn, errorToast, successToast } from "@/lib/utils";
+import formData from "@/lib/helpers/formData";
+import CustomButton from "@/components/buttons/CustomButton";
+import { useLocation, useNavigate } from "react-router-dom";
+import { VscEye } from "react-icons/vsc";
+import { VscEyeClosed } from "react-icons/vsc";
+import { LuArrowUpRight } from "react-icons/lu";
+import { ICategory, IMedia, IProduct } from "@/types/types";
+import { MdDelete } from "react-icons/md";
+import { AiFillEdit } from "react-icons/ai";
+import { GrFormView } from "react-icons/gr";
+import Return from "@/components/returns/Return";
+import Loader from "@/components/Loaders/Loader";
+import productUpdateValidation from "@/validations/productUpdateValidation";
 function EditProductPage() {
-  const [isShowFiles, setIsShowFiles] = useState(false)
-  const [files, setFiles] = useState<(File | string)[]>([])
-  const [filesUrls, setFilesUrls] = useState<string[]>([])
-  const [deletedMedia, setDeletedMedia] = useState<string[]>([])
-  const [name, setName] = useState("")
-  const [showCategories, setShowCategories] = useState(false)
+  const [isShowFiles, setIsShowFiles] = useState(false);
+  const [files, setFiles] = useState<(File | IMedia)[]>([]);
+  const [filesUrls, setFilesUrls] = useState<string[]>([]);
+  const [deletedMedia, setDeletedMedia] = useState<string[]>([]);
+  const [name, setName] = useState("");
+  const [showCategories, setShowCategories] = useState(false);
 
-  const product = useLocation().state?.product as IProduct
-  const navigate = useNavigate()
-  const { categories } = useCategoriesPagination({ name, level: 3, perPage: 5 })
-  const { timeouter } = useSetTimeout()
-  const [editProductMutation, { isLoading }] = useEditProductMutation()
+  const product = useLocation().state?.product as IProduct;
+  const navigate = useNavigate();
+  const { categories } = useCategoriesPagination({
+    name,
+    level: 3,
+    perPage: 5,
+  });
+  const { timeouter } = useSetTimeout();
+  const [editProductMutation, { isLoading }] = useEditProductMutation();
 
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const searchListRef = useRef<HTMLDivElement>(null)
-  const addFilesInputRef = useRef<HTMLInputElement | null>(null)
-  const addFileInputRef = useRef<HTMLInputElement | null>(null)
-  const categoriesRef = useRef<HTMLDivElement | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchListRef = useRef<HTMLDivElement>(null);
+  const addFilesInputRef = useRef<HTMLInputElement | null>(null);
+  const addFileInputRef = useRef<HTMLInputElement | null>(null);
+  const categoriesRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<z.infer<typeof productUpdateValidation>>({
     resolver: zodResolver(productUpdateValidation),
-  })
+  });
 
   const handleSearchCategoryChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
+      const value = e.target.value;
       timeouter(() => {
-        if (name !== value) setName(value)
-        else setShowCategories(false)
-      }, 1000)
+        if (name !== value) setName(value);
+        else setShowCategories(false);
+      }, 1000);
     },
     [name]
-  )
+  );
   const handleFilesChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    fieldChange: (value: (File | string)[]) => void
+    fieldChange: (value: (File | IMedia)[]) => void
   ) => {
     if (e.target.files && e.target.files.length > 0) {
-      let newFiles = e.target.files
-      let urls = []
-      for (let file of newFiles) urls.push(URL.createObjectURL(file))
-      setFiles([...files, ...newFiles])
-      fieldChange([...files, ...newFiles])
-      setFilesUrls([...filesUrls, ...urls])
+      let newFiles = e.target.files;
+      let urls = [];
+      for (let file of newFiles) urls.push(URL.createObjectURL(file));
+      setFiles([...files, ...newFiles]);
+      fieldChange([...files, ...newFiles]);
+      setFilesUrls([...filesUrls, ...urls]);
     }
-  }
+  };
 
   const handleFileChange = (
     i: number,
     e: React.ChangeEvent<HTMLInputElement>,
-    fieldChange: (value: (File | string)[]) => void
+    fieldChange: (value: (File | IMedia)[]) => void
   ) => {
     if (e.target.files && files && filesUrls) {
-      let changedFile = e.target.files[0]
-      let tempFiles = [...files]
-      let tempFilesUrls = [...filesUrls]
-      let changedFileUrl = URL.createObjectURL(changedFile)
+      let changedFile = e.target.files[0];
+      let tempFiles = [...files];
+      let tempFilesUrls = [...filesUrls];
+      let changedFileUrl = URL.createObjectURL(changedFile);
       if (!(files[i] instanceof File))
-        setDeletedMedia([...deletedMedia, files[i]])
-      tempFiles[i] = changedFile
-      tempFilesUrls[i] = changedFileUrl
-      setFiles([...tempFiles])
-      fieldChange([...tempFiles])
-      setFilesUrls([...tempFilesUrls])
+        setDeletedMedia([...deletedMedia, files[i].publicId]);
+      tempFiles[i] = changedFile;
+      tempFilesUrls[i] = changedFileUrl;
+      setFiles([...tempFiles]);
+      fieldChange([...tempFiles]);
+      setFilesUrls([...tempFilesUrls]);
     }
-  }
+  };
   const handleFileRemove = (i: number) => {
     if (files && filesUrls) {
-      const updatedFiles = files.filter((_, index) => index != i)
-      const updatedFilesUrls = filesUrls.filter((_, index) => index != i)
-      setFiles([...updatedFiles])
-      setFilesUrls([...updatedFilesUrls])
+      const tempFiles = files.filter((_, index) => index != i);
+      const tempFilesUrls = filesUrls.filter((_, index) => index != i);
       if (!(files[i] instanceof File))
-        setDeletedMedia([...deletedMedia, files[i]])
-      setFiles([...updatedFiles])
-      setFilesUrls([...updatedFilesUrls])
-      form.setValue("media", updatedFiles)
+        setDeletedMedia([...deletedMedia, files[i].publicId]);
+      setFiles([...tempFiles]);
+      setFilesUrls([...tempFilesUrls]);
+      form.setValue("media", tempFiles);
     }
-  }
+  };
 
   const handleCategorySelection = (category: string) => {
-    form.setValue("search", category)
-    form.setValue("category", category)
-    setShowCategories(false)
-  }
+    form.setValue("search", category);
+    form.setValue("category", category);
+    setShowCategories(false);
+  };
   async function onSubmit(values: z.infer<typeof productUpdateValidation>) {
     try {
-      console.log(values)
-      const credentials = formData(values)
+      console.log("values ", values);
+      const credentials = formData(values);
       const response = await editProductMutation({
         productId: product._id,
         credentials,
-      }).unwrap()
-      successToast(response)
+      }).unwrap();
+      successToast(response);
     } catch (error) {
-      errorToast(error)
+      errorToast(error);
     }
   }
   useEffect(() => {
     if (product) {
-      form.setValue("name", product.name)
-      form.setValue("description", product.description)
-      form.setValue("stock", String(product.stock))
-      form.setValue("brand", product.brand)
-      form.setValue("category", product.category)
-      form.setValue("price", String(product.price))
-      form.setValue("discount", String(product.discount))
-      form.setValue("search", product.category)
-      const urls = product.media.flatMap((media) => media.url)
-      form.setValue("media", urls)
-      setFiles(urls)
-      setFilesUrls(urls)
+      form.setValue("name", product.name);
+      form.setValue("description", product.description);
+      form.setValue("stock", String(product.stock));
+      form.setValue("brand", product.brand);
+      form.setValue("category", product.category);
+      form.setValue("price", String(product.price));
+      form.setValue("discount", String(product.discount));
+      form.setValue("search", product.category);
+      const urls = product.media.flatMap((media) => media.url);
+      form.setValue("media", product.media);
+      setFiles(product.media);
+      setFilesUrls(urls);
     }
-  }, [])
+  }, []);
   useEffect(() => {
-    form.setValue("deletedMedia", deletedMedia)
-  }, [deletedMedia])
+    form.setValue("deletedMedia", deletedMedia);
+  }, [deletedMedia]);
   return (
     <>
       <div
         onClick={(e) => {
           if (!categoriesRef.current?.contains(e.target as Node))
-            setShowCategories(false)
+            setShowCategories(false);
         }}
         className="p-5 relative flex flex-col h-full overflow-y-scroll"
       >
@@ -259,7 +261,7 @@ function EditProductPage() {
                         <GrFormView />
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
               <FormField
@@ -388,7 +390,7 @@ function EditProductPage() {
                             theme="white"
                             onClick={() => {
                               if (addFilesInputRef.current)
-                                addFilesInputRef.current.click()
+                                addFilesInputRef.current.click();
                             }}
                             className="relative w-full border-neutral-200"
                           >
@@ -429,7 +431,7 @@ function EditProductPage() {
         </Form>
       </div>
     </>
-  )
+  );
 }
 
-export default EditProductPage
+export default EditProductPage;

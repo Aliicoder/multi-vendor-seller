@@ -1,14 +1,24 @@
 export type ISellerStatus = "active" | "inactive" | "pending";
+export type ORDER_STATUS = "pending" | "confirmed" | "shipped" | "delivered";
+export type Role = "admin" | "seller" | "client" | "courier";
+
 export interface IAuthState {
   userId: string;
   name: string;
   media: IMedia;
   email?: string;
   roles: Role[];
+  boarded: boolean;
   sellerStatus: ISellerStatus;
   accessToken: string;
   addresses: IAddress[];
 }
+
+export interface IRange {
+  gte: number;
+  lte: number;
+}
+
 export enum HttpStatus {
   OK = 200,
   CREATED = 201,
@@ -17,7 +27,6 @@ export enum HttpStatus {
   FORBIDDEN = 403,
   INTERNAL_SERVER_ERROR = 500,
 }
-export type Role = "admin" | "seller" | "client" | "courier";
 export interface ICategory {
   _id: string;
   name: string;
@@ -171,7 +180,7 @@ export interface IProduct {
 
 export interface IMedia {
   url: string;
-  public_id: string;
+  publicId: string;
   type: "image" | "video";
 }
 export interface IAddress {
@@ -185,4 +194,35 @@ export interface IAddress {
   pinCode: string;
   province: string;
 }
-export type ORDER_STATUS = "pending" | "confirmed" | "shipped" | "delivered";
+
+export interface ITransaction {
+  _id: string;
+  userId: string;
+  cartId: string;
+  orderIds: string[];
+  paymentMethod: "cash" | "paypal" | "upi";
+  amount: number;
+  currency: string;
+  status: "pending" | "paid" | "failed" | "refunded";
+  paymentDetails?: any;
+  transactionId?: string;
+  paypalOrderId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IFilterState {
+  amount?: {
+    gte?: number;
+    lte?: number;
+  };
+  status?: string[];
+}
+
+export type IFilterAction =
+  | {
+      type: "PRICE_RANGE";
+      payload: { gte: number; lte: number };
+    }
+  | { type: "STATUS"; payload: string[] }
+  | { type: "RESET" };

@@ -1,15 +1,15 @@
-import { IMainNavigators, mainNavigators } from "@/constants/navigators"
-import { Link, useLocation } from "react-router-dom"
-import { TbLogout2 } from "react-icons/tb"
-import { useLogoutMutation } from "@/store/apiSlices/authSlice"
-import { getInitials } from "@/lib/utils"
-import { useSelector } from "react-redux"
-import { selectCurrentUser } from "@/store/Reducers/authReducer"
+import { IMainNavigators, mainNavigators } from "@/constants/navigators";
+import { Link, useLocation } from "react-router-dom";
+import { TbLogout2 } from "react-icons/tb";
+import { useLogoutMutation } from "@/store/apiSlices/authSlice";
+import { getInitials } from "@/lib/utils";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "@/store/Reducers/authReducer";
 
 function Sidebar() {
-  const user = useSelector(selectCurrentUser)
-  const [logoutMutation] = useLogoutMutation()
-  const pathname = useLocation().pathname
+  const user = useSelector(selectCurrentUser);
+  const [logoutMutation] = useLogoutMutation();
+  const pathname = useLocation().pathname;
 
   return (
     <div
@@ -22,10 +22,11 @@ function Sidebar() {
 
       <div>
         <ul className="w-fit mr-6">
-          {mainNavigators.map((navigator: IMainNavigators, i) => {
+          {mainNavigators.map((navigator: IMainNavigators) => {
             let selected =
               pathname === navigator.link ||
-              (navigator.link.length > 1 && pathname.startsWith(navigator.link))
+              (navigator.link.length > 1 &&
+                pathname.startsWith(navigator.link));
             return (
               <li
                 className={`${
@@ -42,16 +43,8 @@ function Sidebar() {
                     {navigator.title}
                   </h3>
                 </Link>
-                {navigator.subNavigators &&
-                  navigator.subNavigators.length > 0 && (
-                    <div
-                      className={` ${
-                        selected ? "flex flex-col" : "hidden"
-                      } text-black`}
-                    ></div>
-                  )}
               </li>
-            )
+            );
           })}
         </ul>
       </div>
@@ -77,7 +70,7 @@ function Sidebar() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Sidebar
+export default Sidebar;

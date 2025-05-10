@@ -20,9 +20,23 @@ import {
 import CustomButton from "@/components/buttons/CustomButton";
 import { cn } from "@/lib/utils";
 import { currencyFormatter } from "@/lib/helpers/currencyFormatter";
+import ProductsFilter from "@/components/shared/Filters/ProductsFilter";
+import {
+  selectProductsFilter,
+  setIsFilterOpen,
+} from "@/store/Reducers/Filters/productsFilter";
+import { useDispatch } from "react-redux";
 
 function ProductsPage() {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const {
+    isFilterOpen,
+    priceLocalRange,
+    stockLocalRange,
+    salesLocalRange,
+    ratingLocalRange,
+  } = useSelector(selectProductsFilter);
   const { userId } = useSelector(selectCurrentUser);
   const [name, setSearchName] = useState("");
   const [perPage, setPerPage] = useState(8);
@@ -32,15 +46,19 @@ function ProductsPage() {
     sellerId: userId,
     perPage,
     sort,
+    price: priceLocalRange,
+    stock: stockLocalRange,
+    sales: salesLocalRange,
+    rating: ratingLocalRange,
   });
   const navigate = useNavigate();
   const [productToBeDeleted, setProductToBeDeleted] = useState<IProduct>();
-  const [openFilter, setOpenFilter] = useState(false);
   const { timeouter } = useSetTimeout();
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = event.target.value;
     timeouter(() => {
-      setSearchName(value);
+      if (value.length >= 2) setSearchName(value);
+      else setSearchName("");
     }, 2000);
   };
   const handleSortChange = (name: string, value: string) => {
@@ -59,7 +77,11 @@ function ProductsPage() {
         productToBeDeleted={productToBeDeleted}
         setProductToBeDeleted={setProductToBeDeleted}
       />
-
+      {isFilterOpen && (
+        <div className="fixed top-0 left-0 w-[100svw] h-[100svh] z-[100] bg-black/50">
+          <ProductsFilter />
+        </div>
+      )}
       <div className="flex flex-col p-6 grow relative">
         <div className="flex font-normal gap-5 items-center py-6 relative">
           <div
@@ -71,7 +93,7 @@ function ProductsPage() {
             </div>
             <input
               onChange={handleSearchChange}
-              placeholder="search "
+              placeholder="search"
               className={`pl-3  w-full font-sans  outline-none bg-inherit`}
               type="text"
             />
@@ -80,7 +102,7 @@ function ProductsPage() {
           <CustomButton
             onClick={() => navigate("addProduct")}
             theme="white"
-            className="h-9 text-sm ml-auto"
+            className="h-9 text-sm ml-auto bg-blue-500 text-white"
           >
             add product +
           </CustomButton>
@@ -104,13 +126,13 @@ function ProductsPage() {
               <SelectValue placeholder="default date" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="-createdAt">highest to lowest</SelectItem>
-              <SelectItem value="createdAt">lowest to highest</SelectItem>
+              <SelectItem value="-createdAt">newest to oldest</SelectItem>
+              <SelectItem value="createdAt">oldest to newest</SelectItem>
               <SelectItem value="default">default date</SelectItem>
             </SelectContent>
           </Select>
           <CustomButton
-            onClick={() => setOpenFilter(!openFilter)}
+            onClick={() => dispatch(setIsFilterOpen(true))}
             className="flex h-9 text-sm gap-3 items-center ml-auto"
           >
             Filter
@@ -183,8 +205,8 @@ function ProductsPage() {
                           {product.name}
                         </h1>
                       </td>
-                      <td>{product.category}</td>
-                      <td>{currencyFormatter("INR", product.price)}</td>
+                      <td>{product.category[product.category.length - 1]}</td>
+                      <td>{currencyFormatter("USD", product.price)}</td>
                       <td>{product?.discount}%</td>
                       <td>{product.stock}</td>
                       <td>{product.sales}</td>

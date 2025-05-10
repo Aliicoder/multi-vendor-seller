@@ -1,25 +1,31 @@
 import { useCallback, useEffect, useState } from "react";
 import { ICounter } from "@/types/types";
-import { useGetSellerPaginatedOrdersQuery } from "@/store/apiSlices/orderSlice";
-import { useDispatch } from "react-redux";
+import { useGetSellerPaginatedTransactionsQuery } from "@/store/apiSlices/TransactionSlice";
 import {
   setAmountGlobalRange,
   setAmountLocalRange,
-  setQuantityGlobalRange,
-  setQuantityLocalRange,
-} from "@/store/Reducers/Filters/ordersFilter";
-import { IGetPaginatedOrdersPaginationParams } from "@/types/params";
-
-const useOrdersPagination = ({
-  orderId,
-  deliveryStatus,
-  userId,
+} from "@/store/Reducers/Filters/transactionsFilter";
+import { useDispatch } from "react-redux";
+interface IOrdersPagination {
+  _id: string;
+  sellerId?: string;
+  perPage?: number;
+  sort?: [];
+  curPage?: number;
+  amount?: { gte: number; lte: number };
+  currency?: string;
+  method?: string;
+}
+const useTransactionsPagination = ({
+  _id,
+  sellerId,
   sort,
   perPage,
   curPage,
   amount,
-  quantity,
-}: IGetPaginatedOrdersPaginationParams) => {
+  currency,
+  method,
+}: IOrdersPagination) => {
   const dispatch = useDispatch();
   const [counter, setCounter] = useState<ICounter>({
     prev: 0,
@@ -27,15 +33,15 @@ const useOrdersPagination = ({
     next: 2,
     pagesLen: 2,
   });
-  const { data: response, isLoading } = useGetSellerPaginatedOrdersQuery({
-    orderId,
-    userId,
-    deliveryStatus,
+  const { data: response, isLoading } = useGetSellerPaginatedTransactionsQuery({
+    _id,
+    sellerId,
     curPage: counter.curPage,
     perPage,
     sort,
     amount,
-    quantity,
+    currency,
+    method,
   });
   const handleLeft = useCallback(() => {
     if (counter.prev > 0)
@@ -60,23 +66,16 @@ const useOrdersPagination = ({
   }, [isLoading]);
   useEffect(() => {
     if (response?.maxAmount) {
-      dispatch(setAmountLocalRange({ gte: 0, lte: response?.maxAmount }));
       dispatch(setAmountGlobalRange({ gte: 0, lte: response?.maxAmount }));
+      dispatch(setAmountLocalRange({ gte: 0, lte: response?.maxAmount }));
     }
-  }, [counter]);
-  useEffect(() => {
-    if (response?.maxQuantity) {
-      console.log("response?.maxQuantity >>", response?.maxQuantity);
-      dispatch(setQuantityLocalRange({ gte: 0, lte: response?.maxQuantity }));
-      dispatch(setQuantityGlobalRange({ gte: 0, lte: response?.maxQuantity }));
-    }
-  }, [counter]);
+  }, [response?.maxAmount]);
   return {
-    orders: response?.orders,
+    transactions: response?.transactions,
     counter,
     handleLeft,
     handleRight,
     isLoading,
   };
 };
-export default useOrdersPagination;
+export default useTransactionsPagination;

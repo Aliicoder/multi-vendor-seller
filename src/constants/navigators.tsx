@@ -1,22 +1,18 @@
-import { VscDashboard } from "react-icons/vsc"
-import { TbMessageChatbot } from "react-icons/tb"
-import { BiCartAlt } from "react-icons/bi"
-import { PiChatsCircle } from "react-icons/pi"
-import { AiOutlineProduct } from "react-icons/ai"
-import { RiUserSettingsLine } from "react-icons/ri"
-import { VscSymbolClass } from "react-icons/vsc"
-import { ReactNode } from "react"
-export interface ISubNavigator {
-  title: string
-  link: string
-  segment: string
-}
+import { VscDashboard } from "react-icons/vsc";
+import { TbMessageChatbot } from "react-icons/tb";
+import { BiCartAlt } from "react-icons/bi";
+import { PiChatsCircle } from "react-icons/pi";
+import { AiOutlineProduct } from "react-icons/ai";
+import { RiUserSettingsLine } from "react-icons/ri";
+import { VscSymbolClass } from "react-icons/vsc";
+import { ReactNode } from "react";
+import { PiMoney } from "react-icons/pi";
+
 export interface IMainNavigators {
-  title: string
-  icon: ReactNode
-  link: string
-  segment: string
-  subNavigators?: ISubNavigator[]
+  title: string;
+  icon: ReactNode;
+  link: string;
+  segment: string;
 }
 export const mainNavigators: IMainNavigators[] = [
   {
@@ -36,6 +32,12 @@ export const mainNavigators: IMainNavigators[] = [
     segment: "orders",
     icon: <BiCartAlt />,
     link: "/orders",
+  },
+  {
+    title: "Transactions",
+    segment: "transactions",
+    icon: <PiMoney />,
+    link: "/transactions",
   },
   {
     title: "Categories",
@@ -61,34 +63,4 @@ export const mainNavigators: IMainNavigators[] = [
     icon: <RiUserSettingsLine />,
     link: "/settings",
   },
-]
-
-// export interface ISellerProfileNavigator {
-//   id: number
-//   title: string
-//   icon: JSX.Element
-//   link: string
-// }
-// export const sellerProfileNavigators = [
-//   {
-//     id:1,
-//     title:"Profile Settings",
-//     icon:<IoPersonOutline className="c2 h-full w-full"/>,
-//     link:"details"
-//   },{
-//     id:2,
-//     title:"Password",
-//     icon:<MdSecurity className="c2 h-full w-full"/>,
-//     link:"password"
-//   },{
-//     id:3,
-//     title:"Notifications",
-//     icon:<MdOutlineNotificationsActive className="c2 h-full w-full"/>,
-//     link:"notifications"
-//   },{
-//     id:4,
-//     title:"Verification",
-//     icon:<GoVerified className="c2 h-full w-full"/>,
-//     link:"verification"
-//   }
-// ]
+];

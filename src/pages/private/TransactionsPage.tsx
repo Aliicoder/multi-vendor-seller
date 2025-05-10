@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { CiSearch } from "react-icons/ci";
-import useOrdersPagination from "@/hooks/useOrdersPagination";
 import Pagination from "@/components/shared/Pagination";
-import { IOrder } from "@/types/types";
+import { ITransaction } from "@/types/types";
 import CustomButton from "@/components/buttons/CustomButton";
 import Absolute from "@/components/styled/Absolute";
 import {
@@ -13,40 +12,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TbFilter } from "react-icons/tb";
-import { useConfirmOrderMutation } from "@/store/apiSlices/orderSlice";
-import { cn, errorToast, successToast } from "@/lib/utils";
-import { currencyFormatter } from "@/lib/helpers/currencyFormatter";
 import useSetTimeout from "@/hooks/useSetTimeout";
-import OrdersFilter from "@/components/shared/Filters/OrdersFilter";
-import { useDispatch, useSelector } from "react-redux";
+import useTransactionsPagination from "@/hooks/useTransactionsPagination";
+import dateFormatter from "@/lib/helpers/dateFormatter";
+import { currencyFormatter } from "@/lib/helpers/currencyFormatter";
+import { useSelector } from "react-redux";
 import {
-  selectOrdersFilter,
+  selectIsFilterOpen,
   setIsFilterOpen,
-} from "@/store/Reducers/Filters/ordersFilter";
+  selectTransactionsFilter,
+} from "@/store/Reducers/Filters/transactionsFilter";
+import { useDispatch } from "react-redux";
+import TransactionsFilter from "@/components/shared/Filters/TransactionsFilter";
 import { selectCurrentUser } from "@/store/Reducers/authReducer";
 
-function PendingOrdersPage() {
+function TransactionsPage() {
   const { userId } = useSelector(selectCurrentUser);
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const { timeouter } = useSetTimeout();
-  const { deliveryStatus, isFilterOpen, amountLocalRange, quantityLocalRange } =
-    useSelector(selectOrdersFilter);
   const dispatch = useDispatch();
-
+  const { amountLocalRange, currency, method } = useSelector(
+    selectTransactionsFilter
+  );
+  const isFilterOpen = useSelector(selectIsFilterOpen);
   const [perPage, setPerPage] = useState(5);
   const [sort, setSort] = useState<any>([]);
   const [searchId, setSearchId] = useState("");
 
-  const { orders, counter, handleLeft, handleRight } = useOrdersPagination({
-    orderId: searchId,
-    userId,
-    perPage,
-    deliveryStatus,
-    sort,
-    amount: amountLocalRange,
-    quantity: quantityLocalRange,
-  });
-  const [confirmOrderMutation] = useConfirmOrderMutation();
+  const { transactions, counter, handleLeft, handleRight } =
+    useTransactionsPagination({
+      _id: searchId,
+      perPage,
+      sellerId: userId,
+      sort,
+      amount: amountLocalRange,
+      currency,
+      method,
+    });
 
   const handleSortChange = (name: string, value: string) => {
     setSort((prevSort: string[]) => {
@@ -64,28 +66,11 @@ function PendingOrdersPage() {
       else setSearchId("");
     }, 2000);
   };
-  const handleOrderConfirmation = async (order: IOrder) => {
-    try {
-      const response = await confirmOrderMutation({
-        orderId: order._id,
-      }).unwrap();
-      successToast(response.message);
-    } catch (error: any) {
-      errorToast(error?.data?.message);
-    }
-  };
-  const handleOrderCancellation = (order: IOrder) => {};
-
-  const openInGoogleMaps = (lat: number, lon: number) => {
-    const url = `https://www.google.com/maps?q=${lat},${lon}`;
-    window.open(url, "_blank");
-  };
-
   return (
     <>
       {isFilterOpen && (
         <div className="fixed top-0 left-0 w-[100svw] h-[100svh] z-[100] bg-black/50">
-          <OrdersFilter />
+          <TransactionsFilter />
         </div>
       )}
       <div className="flex flex-col p-6 w-full gap-5">
@@ -130,7 +115,7 @@ function PendingOrdersPage() {
             </SelectContent>
           </Select>
           <CustomButton
-            onClick={() => dispatch(setIsFilterOpen(!isFilterOpen))}
+            onClick={() => dispatch(setIsFilterOpen(true))}
             className="flex h-9 text-sm gap-3 items-center ml-auto"
           >
             Filter
@@ -144,70 +129,50 @@ function PendingOrdersPage() {
             <thead>
               <tr>
                 <th>_Id</th>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>quantity</th>
-                <th>status</th>
+                <th>Status</th>
+                <th>Currency</th>
+                <th>Amount</th>
+                <th>Orders</th>
+                <th>Method</th>
+                <th>Created At</th>
+                <th>Updated At</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {orders ? (
-                orders.length > 0 &&
-                orders.map((order: IOrder) => (
+              {transactions ? (
+                transactions.length > 0 &&
+                transactions.map((transaction: ITransaction) => (
                   <>
-                    <tr key={order._id} className="border border-b text-center">
+                    <tr
+                      key={transaction._id}
+                      className="border border-b text-center"
+                    >
                       <td className="p-5">
                         <h1 className="m-auto text-center w-[10ch] truncate">
-                          {order._id}
+                          {transaction._id}
                         </h1>
                       </td>
-                      <td>
-                        <div className="relative">
-                          {order.productId &&
-                            order.productId?.media?.map((image, i) => {
-                              return (
-                                <div
-                                  style={{ marginLeft: i * 20 }}
-                                  className={cn(
-                                    "rounded-full overflow-hidden border border-blue-500 w-12 h-12",
-                                    i > 0 && "absolute left-0 top-0"
-                                  )}
-                                >
-                                  {image.url ? (
-                                    <img
-                                      className="h-full w-full object-cover"
-                                      src={image.url}
-                                      alt=""
-                                    />
-                                  ) : (
-                                    <span className="text-gray-400">
-                                      No Image
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                        </div>
-                      </td>
-
                       <td>
                         {" "}
                         <h1 className="m-auto text-center w-[15ch] truncate">
-                          {order.productId.name}
+                          {transaction.status}
                         </h1>
                       </td>
-                      <td>{currencyFormatter("INR", order.amount)}</td>
-                      <td>{order.quantity}</td>
-                      <td>{order.status}</td>
-
+                      <td>{transaction.currency}</td>
+                      <td>{currencyFormatter("INR", transaction.amount)}</td>
+                      <td>{transaction.orderIds.length}</td>
+                      <td>{transaction.paymentMethod}</td>
+                      <td>{dateFormatter(transaction?.createdAt!, "date")}</td>
+                      <td>{dateFormatter(transaction?.updatedAt!, "date")}</td>
                       <td>
                         <button
                           className="bg-blue-500 rounded text-white px-4 py-2"
                           onClick={() =>
                             setExpandedRowId(
-                              expandedRowId === order._id ? null : order._id
+                              expandedRowId === transaction._id
+                                ? null
+                                : transaction._id
                             )
                           }
                         >
@@ -215,31 +180,15 @@ function PendingOrdersPage() {
                         </button>
                       </td>
                     </tr>
-                    {expandedRowId === order._id && (
+                    {expandedRowId === transaction._id && (
                       <tr className="bg-slate-50">
                         <td colSpan={10} className="p-4 text-center">
-                          <button
-                            onClick={() => handleOrderConfirmation(order)}
-                            className="bg-green-500 rounded text-white mr-2 px-3 py-2"
-                          >
-                            Confirm
+                          <button className="bg-green-500 rounded text-white mr-2 px-3 py-2">
+                            View
                           </button>
-                          <button
-                            onClick={() => handleOrderCancellation(order)}
-                            className="bg-red-500 rounded text-white mr-2 px-3 py-2"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() =>
-                              openInGoogleMaps(
-                                order.address.lat,
-                                order.address.lon
-                              )
-                            }
-                            className="bg-yellow-500 rounded text-white px-3 py-2"
-                          >
-                            View address
+
+                          <button className="bg-yellow-500 rounded text-white px-3 py-2">
+                            View Orders
                           </button>
                         </td>
                       </tr>
@@ -281,4 +230,4 @@ function PendingOrdersPage() {
   );
 }
 
-export default PendingOrdersPage;
+export default TransactionsPage;

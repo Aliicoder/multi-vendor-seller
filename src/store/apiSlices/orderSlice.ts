@@ -1,19 +1,34 @@
-import { apiSlice } from "@/store/api/apiSlice"
+import { apiSlice } from "@/store/api/apiSlice";
 export const productApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSellerPaginatedOrders: builder.query({
-      query: ({ _id, status, perPage, curPage, sort }) => {
+      query: ({
+        orderId,
+        userId,
+        deliveryStatus,
+        perPage,
+        curPage,
+        sort,
+        amount,
+        quantity,
+      }) => {
         const queryString = [
-          _id ? `_id=${_id}` : ``,
-          status ? `status=${status}` : ``,
+          orderId ? `_id=${orderId}` : ``,
+          userId ? `sellerId=${userId}` : ``,
+          deliveryStatus ? `deliveryStatus=${deliveryStatus}` : ``,
           curPage ? `curPage=${curPage}` : ``,
           perPage ? `perPage=${perPage}` : ``,
           sort ? `sort=${sort}` : ``,
+          amount?.gte ? `amount[gte]=${amount.gte}` : ``,
+          amount?.lte || amount?.lte === 0 ? `amount[lte]=${amount.lte}` : ``,
+          quantity?.gte ? `quantity[gte]=${quantity.gte}` : ``,
+          quantity?.lte || quantity?.lte === 0
+            ? `quantity[lte]=${quantity.lte}`
+            : ``,
         ]
           .filter(Boolean)
-          .join("&&")
-        console.log(queryString)
-        return `/orders/paginated/seller?${queryString}`
+          .join("&&");
+        return `/orders/paginated?${queryString}`;
       },
     }),
     confirmOrder: builder.mutation({
@@ -21,36 +36,10 @@ export const productApiSlice = apiSlice.injectEndpoints({
         return {
           url: `/order/confirm/${orderId}`,
           method: "PATCH",
-        }
+        };
       },
     }),
-    // FetchOrder:builder.mutation({
-    //   query:credentials=>{console.log("FetchProduct credentials>>",credentials)
-    //     return{
-    //       url:`/product?productId=${credentials.productId}`,
-    //       method:'GET',
-    //     }
-    //   }
-    // }),
-    // updateOrder:builder.mutation({
-    //   query:credentials=>{console.log("FetchProduct credentials>>",credentials)
-    //     const formData = formidable(credentials)
-    //     return{
-    //       url:`/product?productId=${credentials.productId}`,
-    //       method:'PATCH',
-    //       body:formData
-    //     }
-    //   }
-    // }),
-    // deleteOrder:builder.mutation({
-    //   query:credentials=>{console.log("FetchProduct credentials>>",credentials)
-    //     return{
-    //       url:`/product?productId=${credentials._id}`,
-    //       method:'DELETE',
-    //     }
-    //   }
-    // })
   }),
-})
+});
 export const { useGetSellerPaginatedOrdersQuery, useConfirmOrderMutation } =
-  productApiSlice
+  productApiSlice;

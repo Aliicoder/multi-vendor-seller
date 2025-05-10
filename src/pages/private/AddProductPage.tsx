@@ -1,86 +1,89 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { useAddProductMutation } from "@/store/apiSlices/productSlice"
-import productValidation from "@/validations/productValidations"
-import useSetTimeout from "@/hooks/useSetTimeout"
-import useCategoriesPagination from "@/hooks/useCategoriesPagination"
-import { cn, errorToast, successToast } from "@/lib/utils"
-import formData from "@/lib/helpers/formData"
-import CustomButton from "@/components/buttons/CustomButton"
-import { useNavigate } from "react-router-dom"
-import { VscEye } from "react-icons/vsc"
-import { VscEyeClosed } from "react-icons/vsc"
-import { LuArrowUpRight } from "react-icons/lu"
-import { ICategory } from "@/types/types"
-import { MdDelete } from "react-icons/md"
-import { AiFillEdit } from "react-icons/ai"
-import { GrFormView } from "react-icons/gr"
-import Return from "@/components/returns/Return"
-import Loader from "@/components/Loaders/Loader"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import React, { useCallback, useRef, useState } from "react";
+import { useAddProductMutation } from "@/store/apiSlices/productSlice";
+import productValidation from "@/validations/productValidations";
+import useSetTimeout from "@/hooks/useSetTimeout";
+import useCategoriesPagination from "@/hooks/useCategoriesPagination";
+import { cn, errorToast, successToast } from "@/lib/utils";
+import formData from "@/lib/helpers/formData";
+import CustomButton from "@/components/buttons/CustomButton";
+import { useNavigate } from "react-router-dom";
+import { VscEye } from "react-icons/vsc";
+import { VscEyeClosed } from "react-icons/vsc";
+import { LuArrowUpRight } from "react-icons/lu";
+import { ICategory } from "@/types/types";
+import { MdDelete } from "react-icons/md";
+import { AiFillEdit } from "react-icons/ai";
+import { GrFormView } from "react-icons/gr";
+import Return from "@/components/returns/Return";
+import Loader from "@/components/Loaders/Loader";
 function AddProductPage() {
-  const [isShowFiles, setIsShowFiles] = useState(false)
-  const [files, setFiles] = useState<File[]>([])
-  const [filesUrls, setFilesUrls] = useState<string[]>([])
-  const [name, setName] = useState("")
-  const [showCategories, setShowCategories] = useState(false)
+  const [isShowFiles, setIsShowFiles] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [filesUrls, setFilesUrls] = useState<string[]>([]);
+  const [name, setName] = useState("");
+  const [showCategories, setShowCategories] = useState(false);
 
-  const navigate = useNavigate()
-  const { categories } = useCategoriesPagination({ name, level: 3, perPage: 5 })
-  const { timeouter } = useSetTimeout()
-  const [addProductMutation, { isLoading }] = useAddProductMutation()
+  const navigate = useNavigate();
+  const { categories } = useCategoriesPagination({
+    name,
+    level: 3,
+    perPage: 5,
+  });
+  const { timeouter } = useSetTimeout();
+  const [addProductMutation, { isLoading }] = useAddProductMutation();
 
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const searchListRef = useRef<HTMLDivElement>(null)
-  const addFilesInputRef = useRef<HTMLInputElement | null>(null)
-  const addFileInputRef = useRef<HTMLInputElement | null>(null)
-  const categoriesRef = useRef<HTMLDivElement | null>(null)
-  const imgInfoRef = useRef<HTMLDivElement | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchListRef = useRef<HTMLDivElement>(null);
+  const addFilesInputRef = useRef<HTMLInputElement | null>(null);
+  const addFileInputRef = useRef<HTMLInputElement | null>(null);
+  const categoriesRef = useRef<HTMLDivElement | null>(null);
+  const imgInfoRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<z.infer<typeof productValidation>>({
     resolver: zodResolver(productValidation),
-  })
+  });
 
   const handleSearchCategoryChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
+      const value = e.target.value;
       timeouter(() => {
-        if (name !== value) setName(value)
-      }, 1000)
+        if (name !== value) setName(value);
+      }, 1000);
     },
     [name]
-  )
+  );
 
   const handleClose = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!categoriesRef.current?.contains(e.target as Node))
-      setShowCategories(false)
-  }
+      setShowCategories(false);
+  };
 
   const handleFilesChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldChange: (value: File[]) => void
   ) => {
     if (e.target.files && e.target.files.length > 0) {
-      let newFiles = e.target.files
-      let urls = []
-      for (let file of newFiles) urls.push(URL.createObjectURL(file))
-      fieldChange([...files, ...newFiles])
-      setFiles([...files, ...newFiles])
-      setFilesUrls([...filesUrls, ...urls])
+      let newFiles = e.target.files;
+      let urls = [];
+      for (let file of newFiles) urls.push(URL.createObjectURL(file));
+      fieldChange([...files, ...newFiles]);
+      setFiles([...files, ...newFiles]);
+      setFilesUrls([...filesUrls, ...urls]);
     }
-  }
+  };
 
   const handleFileChange = (
     i: number,
@@ -88,40 +91,40 @@ function AddProductPage() {
     fieldChange: (value: File[]) => void
   ) => {
     if (e.target.files && files && filesUrls) {
-      let changedFile = e.target.files[0]
-      let tempFiles = [...files]
-      let tempFilesUrls = [...filesUrls]
-      let changedFileUrl = URL.createObjectURL(changedFile)
-      tempFiles[i] = changedFile
-      tempFilesUrls[i] = changedFileUrl
-      fieldChange([...tempFiles])
-      setFiles([...tempFiles])
-      setFilesUrls([...tempFilesUrls])
+      let changedFile = e.target.files[0];
+      let tempFiles = [...files];
+      let tempFilesUrls = [...filesUrls];
+      let changedFileUrl = URL.createObjectURL(changedFile);
+      tempFiles[i] = changedFile;
+      tempFilesUrls[i] = changedFileUrl;
+      fieldChange([...tempFiles]);
+      setFiles([...tempFiles]);
+      setFilesUrls([...tempFilesUrls]);
     }
-  }
+  };
   const handleFileRemove = (i: number) => {
     if (files && filesUrls) {
-      const updatedFiles = files.filter((_, index) => index != i)
-      const updatedFilesUrls = filesUrls.filter((_, index) => index != i)
-      setFiles([...updatedFiles])
-      setFilesUrls([...updatedFilesUrls])
-      form.setValue("media", updatedFiles)
+      const updatedFiles = files.filter((_, index) => index != i);
+      const updatedFilesUrls = filesUrls.filter((_, index) => index != i);
+      setFiles([...updatedFiles]);
+      setFilesUrls([...updatedFilesUrls]);
+      form.setValue("media", updatedFiles);
     }
-  }
+  };
 
   const handleCategorySelection = (category: string) => {
-    form.setValue("search", category)
-    form.setValue("category", category)
-    setShowCategories(false)
-  }
+    form.setValue("search", category);
+    form.setValue("category", category);
+    setShowCategories(false);
+  };
   async function onSubmit(values: z.infer<typeof productValidation>) {
     try {
-      const credentials = formData(values)
-      const response = await addProductMutation({ credentials }).unwrap()
-      successToast(response)
-      form.reset()
-    } catch (error) {
-      errorToast(error)
+      const credentials = formData(values);
+      const response = await addProductMutation({ credentials }).unwrap();
+      successToast(response.message);
+      form.reset();
+    } catch (error: any) {
+      errorToast(error.data.message);
     }
   }
 
@@ -240,7 +243,7 @@ function AddProductPage() {
                         <GrFormView />
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
               <FormField
@@ -358,9 +361,9 @@ function AddProductPage() {
                   control={form.control}
                   name="media"
                   render={({ field }) => (
-                    <FormItem className="w-full">
+                    <FormItem className="w-full border rounded-md shadow-sm">
                       <FormControl>
-                        <div className="relative gap-3 flex">
+                        <div className="relative flex">
                           <h1 className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                             select files
                           </h1>
@@ -369,9 +372,9 @@ function AddProductPage() {
                             theme="white"
                             onClick={() => {
                               if (addFilesInputRef.current)
-                                addFilesInputRef.current.click()
+                                addFilesInputRef.current.click();
                             }}
-                            className="relative w-full border-neutral-200"
+                            className="relative w-full shadow-none border-0"
                           >
                             <Input
                               ref={addFilesInputRef}
@@ -385,6 +388,7 @@ function AddProductPage() {
                             />
                           </CustomButton>
                           <CustomButton
+                            className="shadow-none border-0"
                             theme="white"
                             type="button"
                             onClick={() => setIsShowFiles((prev) => !prev)}
@@ -410,7 +414,7 @@ function AddProductPage() {
         </Form>
       </div>
     </>
-  )
+  );
 }
 
-export default AddProductPage
+export default AddProductPage;

@@ -1,21 +1,16 @@
-import { PropsWithChildren } from 'react'
-import ThemeProvider from './ThemeContext'
-import LoaderProvider from './LoaderContext'
-import CategoriesProvider from './CategoriesContext'
-import FilterProvider, { FilterContext } from './FilterProductsContext'
-interface ThemeContext extends PropsWithChildren{}
-function Contexts({children}:ThemeContext){
+import { PropsWithChildren } from "react";
+import ThemeProvider from "./ThemeContext";
+import LoaderProvider from "./LoaderContext";
+import CategoriesProvider from "./CategoriesContext";
+interface ThemeContext extends PropsWithChildren {}
+function Contexts({ children }: ThemeContext) {
   return (
     <LoaderProvider>
-    <ThemeProvider>
-    <CategoriesProvider>  
-    <FilterProvider>
-      {children}
-    </FilterProvider>
-    </CategoriesProvider>
-    </ThemeProvider>
+      <ThemeProvider>
+        <CategoriesProvider>{children}</CategoriesProvider>
+      </ThemeProvider>
     </LoaderProvider>
-  )
+  );
 }
 
-export default Contexts
+export default Contexts;

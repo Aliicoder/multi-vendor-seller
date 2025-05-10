@@ -1,9 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import toast from "react-hot-toast"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import toast from "react-hot-toast";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const getInitials = (name: string) => {
@@ -11,17 +11,17 @@ export const getInitials = (name: string) => {
     .split(" ", 2)
     .map((word) => word[0])
     .join("")
-    .toUpperCase()
-}
+    .toUpperCase();
+};
 
-export const errorToast = (error: any) => {
-  toast.error(error.data.message ?? "unknown error occurred")
-}
+export const errorToast = (message: string) => {
+  toast.error(message ?? "unknown error occurred");
+};
 
-export const successToast = (response: any) => {
-  toast.success(response.message)
-}
+export const successToast = (message: string) => {
+  toast.success(message ?? "succefull request");
+};
 export const placePlaceHolder = (value: string, placeholder: string) => {
-  if (value) return
-  return { placeholder }
-}
+  if (value) return;
+  return { placeholder };
+};

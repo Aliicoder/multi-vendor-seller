@@ -1,4 +1,4 @@
-import { apiSlice } from "@/store/api/apiSlice"
+import { apiSlice } from "@/store/api/apiSlice";
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     refresh: builder.mutation({
@@ -14,11 +14,25 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials },
       }),
     }),
-    signup: builder.mutation({
+    googleLogin: builder.mutation({
       query: (credentials) => ({
-        url: "/users/signup",
+        url: "/users/google-login",
         method: "POST",
-        body: { ...credentials },
+        body: credentials,
+      }),
+    }),
+    sendEmailOtp: builder.mutation({
+      query: (credentials) => ({
+        url: `/users/send-email-otp`,
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    verifyEmailOtp: builder.mutation({
+      query: (credentials) => ({
+        url: `/users/verify-email-otp`,
+        method: "POST",
+        body: credentials,
       }),
     }),
     logout: builder.mutation({
@@ -26,8 +40,15 @@ export const authApiSlice = apiSlice.injectEndpoints({
         return {
           url: "/users/logout",
           method: "PATCH",
-        }
+        };
       },
+    }),
+    onboarding: builder.mutation({
+      query: (credentials) => ({
+        url: `/users/${credentials.userId}/onboarding`,
+        method: "POST",
+        body: credentials,
+      }),
     }),
     fetchProfile: builder.query({
       query: () => ({
@@ -36,12 +57,12 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     editGeneralInfo: builder.mutation({
-      query: (credentials) => {
+      query: () => {
         return {
           url: "/seller/generalInfo",
           method: "POST",
           body: true,
-        }
+        };
       },
     }),
     editShopInfo: builder.mutation({
@@ -50,17 +71,20 @@ export const authApiSlice = apiSlice.injectEndpoints({
           url: "/seller/businessInfo",
           method: "POST",
           body: credentials,
-        }
+        };
       },
     }),
   }),
-})
+});
 export const {
   useRefreshMutation,
-  useSignupMutation,
+  useSendEmailOtpMutation,
+  useVerifyEmailOtpMutation,
   useLoginMutation,
   useFetchProfileQuery,
   useEditGeneralInfoMutation,
+  useOnboardingMutation,
   useEditShopInfoMutation,
+  useGoogleLoginMutation,
   useLogoutMutation,
-} = authApiSlice
+} = authApiSlice;
